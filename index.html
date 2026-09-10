@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Source Governance Engine — Natalie Holly Purviance</title>
+<meta name="description" content="A browser extension that documents where a story's reporting actually came from, so the record stays with the newsroom when a reporter leaves.">
+<meta name="author" content="Natalie Holly Purviance">
+<link rel="canonical" href="https://nhpportfolio.github.io/sge/">
+
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="theme-color" content="#FFFCF6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16150F" media="(prefers-color-scheme: dark)">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Source Governance Engine">
+<meta property="og:locale" content="en_US">
+<meta property="og:url" content="https://nhpportfolio.github.io/sge/">
+<meta property="og:title" content="Source Governance Engine">
+<meta property="og:description" content="A browser extension that documents where a story's reporting actually came from, so the record stays with the newsroom when a reporter leaves.">
+<meta property="og:image" content="https://nhpportfolio.github.io/sge/og-sge.png">
+<meta property="og:image:secure_url" content="https://nhpportfolio.github.io/sge/og-sge.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Source Governance Engine — Newsrooms lose their sources one resignation at a time.">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Source Governance Engine">
+<meta name="twitter:description" content="A browser extension that documents where a story's reporting actually came from, so the record stays with the newsroom when a reporter leaves.">
+<meta name="twitter:image" content="https://nhpportfolio.github.io/sge/og-sge.png">
+<meta name="twitter:image:alt" content="Source Governance Engine — Newsrooms lose their sources one resignation at a time.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600&display=swap">
+
+<style>
+  /* Light palette — complete. Every token is defined here before any media or
+     [data-theme] block redefines it.
+
+     Brighter than newsprint on purpose: this page is read after a talk, and it
+     should feel like the instrument rather than the archive. Amber is the
+     extension's own highlighter — the colour it paints across a passage in the
+     article — so it carries meaning here rather than decorating. */
+  :root {
+    color-scheme: light dark;
+    --paper:      #FFFCF6;
+    --field:      #FFFFFF;
+    --ink:        #16130F;
+    --ink-2:      #55504A;
+    --ink-3:      #8A837A;
+    --rule:       #E6DFD4;
+    --rule-firm:  #C9C0B2;
+    --mark:       #C0322F;  /* the decision a person makes */
+    --amber:      #F0B429;  /* the highlighter */
+    --amber-soft: #FFE9A8;
+    --cleared:    #1F7A54;  /* reaches readers */
+    --cleared-soft:#D7F0E2;
+    --focus:      #16130F;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:       #16150F;
+      --field:       #1E1C16;
+      --ink:         #F5F0E6;
+      --ink-2:       #B0A99C;
+      --ink-3:       #837C70;
+      --rule:        #33302A;
+      --rule-firm:   #4A463D;
+      --mark:        #F0827C;
+      --amber:       #F5C543;
+      --amber-soft:  #4A3A12;
+      --cleared:     #6FCB9F;
+      --cleared-soft:#163024;
+      --focus:       #F5F0E6;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:       #16150F;
+    --field:       #1E1C16;
+    --ink:         #F5F0E6;
+    --ink-2:       #B0A99C;
+    --ink-3:       #837C70;
+    --rule:        #33302A;
+    --rule-firm:   #4A463D;
+    --mark:        #F0827C;
+    --amber:       #F5C543;
+    --amber-soft:  #4A3A12;
+    --cleared:     #6FCB9F;
+    --cleared-soft:#163024;
+    --focus:       #F5F0E6;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; }
+
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 28px; }
+  .band { border-bottom: 1px solid var(--rule); }
+
+  h1, h2 {
+    font-family: Newsreader, ui-serif, Georgia, serif;
+    font-weight: 600;
+    text-wrap: balance;
+    margin: 0;
+    letter-spacing: -0.015em;
+  }
+  h1 { font-size: clamp(38px, 6.4vw, 62px); line-height: 1.04; }
+  h2 { font-size: clamp(24px, 3vw, 30px); line-height: 1.15; }
+  p { margin: 0; }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  /* ── Masthead ────────────────────────────────────────────────────────── */
+  .masthead {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap; padding: 20px 0;
+  }
+  .wordmark {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12.5px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink);
+    border-left: 4px solid var(--mark);
+    padding-left: 10px;
+  }
+
+  /* ── Hero ────────────────────────────────────────────────────────────── */
+  .hero { padding: 76px 0 68px; }
+  @media (max-width: 760px) { .hero { padding: 48px 0 44px; } }
+  .hero h1 { max-width: 15ch; }
+  /* The headline is marked the way the extension marks a passage in an
+     article: amber wash, crimson rule down the left. The page demonstrates the
+     product in its first line rather than describing it. */
+  .hero h1 mark {
+    background: linear-gradient(transparent 8%, var(--amber-soft) 8%);
+    color: inherit;
+    padding: 0 2px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  .hero .lede {
+    font-family: Newsreader, ui-serif, Georgia, serif;
+    font-size: clamp(19px, 2.2vw, 23px);
+    line-height: 1.45;
+    color: var(--ink-2);
+    max-width: 52ch;
+    margin-top: 26px;
+  }
+  .hero .byline {
+    margin-top: 30px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11.5px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+
+  /* ── Section shell ───────────────────────────────────────────────────── */
+  .sec { padding: 60px 0; }
+  @media (max-width: 760px) { .sec { padding: 44px 0; } }
+  .sec-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 34px; }
+
+  /* ── The mechanism, drawn ────────────────────────────────────────────── */
+  figure { margin: 0; display: flex; flex-direction: column; align-items: center; }
+  figure svg { width: 100%; max-width: 660px; height: auto; display: block; }
+  figcaption {
+    margin-top: 18px; font-size: 13.5px; color: var(--ink-3);
+    max-width: 54ch; text-align: center;
+  }
+
+  /* ── Points ──────────────────────────────────────────────────────────── */
+  .points {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 26px 34px;
+  }
+  .point { display: flex; flex-direction: column; gap: 8px; }
+  .point-n {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+    color: var(--mark);
+  }
+  .point h3 {
+    margin: 0;
+    font-family: Newsreader, ui-serif, Georgia, serif;
+    font-size: 20px; font-weight: 600; line-height: 1.22;
+    letter-spacing: -0.01em;
+  }
+  .point p { font-size: 14.5px; line-height: 1.55; color: var(--ink-2); }
+
+  /* ── Subscribe ───────────────────────────────────────────────────────── */
+  .subscribe {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 42px 38px;
+    display: flex; flex-direction: column; gap: 16px;
+    align-items: flex-start;
+  }
+  @media (max-width: 620px) { .subscribe { padding: 30px 24px; } }
+  .subscribe h2 { color: var(--paper); max-width: 18ch; }
+  .subscribe h2 em { font-style: normal; color: var(--amber); }
+  .subscribe p { font-size: 14.5px; color: var(--rule-firm); max-width: 50ch; }
+  .subscribe-btn {
+    margin-top: 6px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12.5px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink);
+    background: var(--amber);
+    border: none;
+    padding: 15px 26px;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .subscribe-btn:hover { background: var(--amber-soft); }
+
+  /* ── Footer ──────────────────────────────────────────────────────────── */
+  footer {
+    padding: 30px 0 54px;
+    font-size: 13px; color: var(--ink-3);
+    display: flex; gap: 6px 24px; flex-wrap: wrap;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .subscribe-btn { transition: background-color .15s ease; }
+  }
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="wrap masthead">
+    <span class="wordmark">Source&nbsp;Governance&nbsp;Engine</span>
+  </div>
+</header>
+
+<section class="band">
+  <div class="wrap hero">
+    <h1>Newsrooms lose their sources <mark>one resignation at a time.</mark></h1>
+    <p class="lede">A browser extension that documents where a story's reporting actually came from, so the record stays with the newsroom.</p>
+    <p class="byline">Natalie Holly Purviance</p>
+  </div>
+</section>
+
+<!-- ── How it works ───────────────────────────────────────────────────── -->
+<section class="band">
+  <div class="wrap sec">
+    <div class="sec-head">
+      <span class="eyebrow">How it works</span>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 660 566" role="img"
+           aria-label="A published story is read by the extension, which proposes every source with its passage and every document the story links to. The reporter confirms what was promised to each source. On-the-record sources can reach readers; everything else stays inside the newsroom. Either way the story adds to the newsroom's record, which over many stories shows who and what the newsroom relies on.">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <g font-family="IBM Plex Sans, sans-serif" fill="currentColor">
+
+          <!-- 1. the story -->
+          <rect x="180" y="14" width="300" height="48" rx="3"
+                fill="var(--field)" stroke="currentColor" stroke-width="1.5"/>
+          <text x="330" y="43" font-size="14" text-anchor="middle">A story you published</text>
+
+          <line x1="330" y1="62" x2="330" y2="96" stroke="currentColor"
+                stroke-width="1.5" marker-end="url(#ar)"/>
+          <text x="342" y="83" font-size="11.5" fill="var(--ink-3)">it reads the piece</text>
+
+          <!-- 2. what it finds -->
+          <rect x="130" y="96" width="400" height="82" rx="3"
+                fill="var(--field)" stroke="currentColor" stroke-width="1.5"/>
+          <text x="330" y="126" font-size="14" text-anchor="middle">Every source, with the passage it came from</text>
+          <text x="330" y="152" font-size="14" text-anchor="middle">Every document the story links to</text>
+
+          <line x1="330" y1="178" x2="330" y2="222" stroke="currentColor"
+                stroke-width="1.5" marker-end="url(#ar)"/>
+          <text x="342" y="204" font-size="11.5" fill="var(--ink-3)">one question per source</text>
+
+          <!-- 3. the human decision -->
+          <rect x="150" y="222" width="360" height="54" rx="3"
+                fill="var(--field)" stroke="var(--mark)" stroke-width="2.5"/>
+          <text x="330" y="248" font-size="14.5" font-weight="600" text-anchor="middle"
+                fill="var(--mark)">What did you promise this person?</text>
+          <text x="330" y="267" font-size="11.5" text-anchor="middle" fill="var(--ink-3)">the one thing a model cannot infer</text>
+
+          <!-- branch -->
+          <path d="M 330 276 L 330 300 L 165 300 L 165 326" fill="none"
+                stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+          <path d="M 330 276 L 330 300 L 495 300 L 495 326" fill="none"
+                stroke="var(--cleared)" stroke-width="1.5" marker-end="url(#ar)"/>
+
+          <rect x="30" y="326" width="270" height="52" rx="3"
+                fill="var(--field)" stroke="currentColor" stroke-width="1.5"/>
+          <text x="165" y="348" font-size="13" text-anchor="middle">Background, off record,</text>
+          <text x="165" y="366" font-size="13" text-anchor="middle">not yet decided</text>
+
+          <rect x="360" y="326" width="270" height="52" rx="3"
+                fill="var(--cleared-soft)" stroke="var(--cleared)" stroke-width="1.5"/>
+          <text x="495" y="348" font-size="13" text-anchor="middle" fill="var(--cleared)">On the record</text>
+          <text x="495" y="366" font-size="13" text-anchor="middle" fill="var(--cleared)">A reader can see it</text>
+
+          <!-- 4. the record -->
+          <path d="M 165 378 L 165 404 L 330 404 L 330 424" fill="none"
+                stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+          <path d="M 495 378 L 495 404 L 330 404 L 330 424" fill="none"
+                stroke="currentColor" stroke-width="1.5"/>
+
+          <rect x="130" y="424" width="400" height="48" rx="3"
+                fill="var(--field)" stroke="currentColor" stroke-width="1.5"/>
+          <text x="330" y="453" font-size="14" text-anchor="middle">The newsroom keeps the record</text>
+
+          <line x1="330" y1="472" x2="330" y2="504" stroke="currentColor"
+                stroke-width="1.5" marker-end="url(#ar)"/>
+          <text x="342" y="492" font-size="11.5" fill="var(--ink-3)">story after story</text>
+
+          <!-- 5. the payoff -->
+          <rect x="130" y="504" width="400" height="52" rx="3"
+                fill="var(--amber-soft)" stroke="var(--amber)" stroke-width="2"/>
+          <text x="330" y="536" font-size="15" font-weight="600" text-anchor="middle">Who and what you rely on</text>
+        </g>
+      </svg>
+      <figcaption>Everything is recorded either way. Only a source a person confirmed as on the record can ever reach a reader.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ── Why ────────────────────────────────────────────────────────────── -->
+<section class="band">
+  <div class="wrap sec">
+    <div class="sec-head">
+      <span class="eyebrow">Why I built it</span>
+      <h2>Three things a newsroom cannot see.</h2>
+    </div>
+
+    <div class="points">
+      <div class="point">
+        <span class="point-n">01</span>
+        <h3>The source map leaves with the reporter</h3>
+        <p>Who was reliable, who spoke under what conditions, who was never going to call back. It lives in one person's head and one person's notebook, and community newsrooms feel that hardest.</p>
+      </div>
+      <div class="point">
+        <span class="point-n">02</span>
+        <h3>Who and what you typically rely on</h3>
+        <p>Which people a beat keeps going back to, which institutions end up speaking for a community, which documents the reporting rests on. Questions about a body of work, not one story. Nobody answers them from memory.</p>
+      </div>
+      <div class="point">
+        <span class="point-n">03</span>
+        <h3>What a story rests on, for the reader</h3>
+        <p>Someone checking a claim goes to a search engine or a chatbot, not to the reporting the newsroom did. That is only solvable once the first two are.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Subscribe ──────────────────────────────────────────────────────── -->
+<section>
+  <div class="wrap sec">
+    <div class="subscribe">
+      <h2>Follow where this <em>goes</em></h2>
+      <p>Occasional notes as this moves toward a newsroom pilot: what the partner conversations settle, and when there is something to try. No more than a few a year.</p>
+      <a class="subscribe-btn" href="https://sourcegovernanceengine.substack.com/subscribe"
+         target="_blank" rel="noopener">Subscribe on Substack &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <span>Source Governance Engine</span>
+  <span>Natalie Holly Purviance</span>
+</footer>
+
+</body>
+</html>
