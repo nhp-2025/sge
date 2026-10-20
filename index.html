@@ -4,33 +4,33 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Source Governance Engine — Natalie Holly Purviance</title>
+<title>Soven — Source Governance for Newsrooms</title>
 <meta name="description" content="A browser extension that documents where a story's reporting actually came from, so the record stays with the newsroom when a reporter leaves.">
 <meta name="author" content="Natalie Holly Purviance">
-<link rel="canonical" href="https://nhpportfolio.github.io/sge/">
+<link rel="canonical" href="https://nhp-2025.github.io/sge/">
 
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="theme-color" content="#FFFCF6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16150F" media="(prefers-color-scheme: dark)">
 
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Source Governance Engine">
+<meta property="og:site_name" content="Soven">
 <meta property="og:locale" content="en_US">
-<meta property="og:url" content="https://nhpportfolio.github.io/sge/">
-<meta property="og:title" content="Source Governance Engine">
+<meta property="og:url" content="https://nhp-2025.github.io/sge/">
+<meta property="og:title" content="Soven — Source governance for newsrooms">
 <meta property="og:description" content="A browser extension that documents where a story's reporting actually came from, so the record stays with the newsroom when a reporter leaves.">
-<meta property="og:image" content="https://nhpportfolio.github.io/sge/og-sge.png">
-<meta property="og:image:secure_url" content="https://nhpportfolio.github.io/sge/og-sge.png">
+<meta property="og:image" content="https://nhp-2025.github.io/sge/og-soven.png">
+<meta property="og:image:secure_url" content="https://nhp-2025.github.io/sge/og-soven.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Source Governance Engine — Newsrooms lose their sources one resignation at a time.">
+<meta property="og:image:alt" content="Soven, source governance for newsrooms — Newsrooms lose their sources one resignation at a time.">
 
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Source Governance Engine">
+<meta name="twitter:title" content="Soven — Source governance for newsrooms">
 <meta name="twitter:description" content="A browser extension that documents where a story's reporting actually came from, so the record stays with the newsroom when a reporter leaves.">
-<meta name="twitter:image" content="https://nhpportfolio.github.io/sge/og-sge.png">
-<meta name="twitter:image:alt" content="Source Governance Engine — Newsrooms lose their sources one resignation at a time.">
+<meta name="twitter:image" content="https://nhp-2025.github.io/sge/og-soven.png">
+<meta name="twitter:image:alt" content="Soven, source governance for newsrooms — Newsrooms lose their sources one resignation at a time.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -239,6 +239,11 @@
     display: flex; gap: 6px 24px; flex-wrap: wrap;
   }
 
+  /* Side gutter. Kept last so the padding shorthands on .masthead, .hero
+     and .sec above don't zero it out. */
+  .wrap { padding-left: 28px; padding-right: 28px; }
+  @media (max-width: 620px) { .wrap { padding-left: 18px; padding-right: 18px; } }
+
   @media (prefers-reduced-motion: no-preference) {
     .subscribe-btn { transition: background-color .15s ease; }
   }
@@ -248,7 +253,8 @@
 
 <header class="band">
   <div class="wrap masthead">
-    <span class="wordmark">Source&nbsp;Governance&nbsp;Engine</span>
+    <span class="wordmark">Soven</span>
+    <span class="eyebrow">Source governance for newsrooms</span>
   </div>
 </header>
 
@@ -387,7 +393,7 @@
 </section>
 
 <footer class="wrap">
-  <span>Source Governance Engine</span>
+  <span>Soven — source governance for newsrooms</span>
   <span>Natalie Holly Purviance</span>
 </footer>
 
